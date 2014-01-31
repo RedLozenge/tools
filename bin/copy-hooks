@@ -1,0 +1,19 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+
+HOOKS_INSTALLED=0
+HOOK_FILES="pre-commit post-commit"
+
+for HOOK_FILE in ${HOOK_FILES}; do
+    # Install precommit hooks
+    diff $BASE_PATH/etc/${HOOK_FILE}.skel $BASE_PATH/.git/hooks/${HOOK_FILE} &> /dev/null
+    if [ $? -ne 0 ]; then
+        echo "installing new hook file: $HOOK_FILE"
+        install $BASE_PATH/etc/${HOOK_FILE}.skel $BASE_PATH/.git/hooks/${HOOK_FILE} &> /dev/null
+        chmod 755 $BASE_PATH/.git/hooks/${HOOK_FILE}
+
+        HOOKS_INSTALLED=$(( $HOOKS_INSTALLED + 1 ))
+    fi
+done
+
+exit $HOOKS_INSTALLED

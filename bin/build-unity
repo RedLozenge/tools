@@ -1,0 +1,38 @@
+#!/bin/bash
+
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+BUILD_LOG="build.log"
+
+pushd "${BASE_PATH}" &> /dev/null
+
+bin/ensure-unity-is-closed
+if [ $? -ne 0 ]; then
+    echo "error: unity is still running, aborting build."
+    exit 1
+fi
+
+# Remove old build log
+rm "${BUILD_LOG}" &> /dev/null || true
+
+# Execute Unity build
+echo "building Xcode project from Unity..."
+/Applications/Unity/Unity.app/Contents/MacOS/Unity \
+    -batchmode \
+    -quit \
+    -logFile "${BUILD_LOG}" \
+    -projectPath "${BASE_PATH}/" \
+    -executeMethod BuildScript.PerformBuild
+
+# Check to see if iOS built properly... in a gross way, since Unity doesn't
+# believe in error codes.
+grep "Completed 'Build.Player.iPhonePlayer'" "${BUILD_LOG}" &> /dev/null
+UNITY_BUILD_STATUS=$?
+
+# Check build status
+if [ $UNITY_BUILD_STATUS -ne 0 ]; then
+    echo "error: build failed, see log file '${BUILD_LOG}'"
+    exit 1
+else
+    echo "build succeeded"
+    exit 0
+fi

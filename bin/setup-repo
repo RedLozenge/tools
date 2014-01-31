@@ -1,0 +1,8 @@
+#!/bin/bash
+# This script should be run immediately after checkout. It will configure
+# the developer's repository as suggested by the project maintainers.
+
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+
+# Install precommit hooks
+$BASE_PATH/bin/copy-hooks

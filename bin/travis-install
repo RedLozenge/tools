@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Script to configure the Travis-CI build environment for our project.
+
+
+UNITY_URL="http://netstorage.unity3d.com/unity/unity-4.3.3.dmg"
+
+####################
+# Download & install Unity
+UNITY_FILE="/tmp/unity.dmg"
+curl -o "${UNITY_FILE}" "${UNITY_URL}"
+
+hdiutil mount "${UNITY_FILE}"

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROCESS_GREP="`ps aux | grep Unity.app/Contents/MacOS/Unity | grep -v grep`"
+if [ ! -z "$PROCESS_GREP" ]; then
+    exit 1
+fi
+
+exit 0

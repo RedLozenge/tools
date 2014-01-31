@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Exit codes:
+# 10 - Unity still running
+# 11 - Xcode project files detected
+# 12 - Unity build failed
+# 20 - jshint error
+
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
+UNTRACKED_FILE_WARNING=3
+# set -x
+
+function err() {
+    echo "[31;01m$@[0m" 1>&2
+}
+
+pushd $BASE_PATH &> /dev/null
+
+# Copy newest version of hooks
+bin/copy-hooks
+if [ $? -gt 0 ]; then
+    # run the new hook script
+    .git/hooks/pre-commit
+    exit $?
+fi
+
+# Check for running Unity
+bin/ensure-unity-is-closed
+if [ $? -ne 0 ]; then
+    err "ERROR committing:"
+    err "    Unity is still running. Please save & shut it down before committing."
+    exit 10
+fi
+
+# Check for Xcode projects
+XCODE_GREP=`git status --porcelain --untracked-files=all | \
+            egrep -o '[a-zA-Z0-9\ -_]+.xcodeproj' | \
+            uniq | \
+            grep -v 'iOS/Unity-iPhone.xcodeproj'`
+if [ ! -z "$XCODE_GREP" ]; then
+    err "ERROR committing:"
+    err "    It looks like you have other Xcode projects in your checkout."
+    err "    Please remove them."
+    err "    See: $XCODE_GREP"
+    exit 11
+fi
+
+# Check for untracked files
+UNTRACKED_COUNT=`git status --porcelain --untracked-files=all | egrep '^\?\?' | wc -l | egrep -o '[0-9]+'`
+if [ "$UNTRACKED_COUNT" -gt 0 ]; then
+    err "[31;01mWARNING:[0m"
+    err "    There are untracked files in this repo!"
+    err "    Did you forget to run 'git add .' ?"
+
+    if [ "$UNTRACKED_COUNT" -gt "$UNTRACKED_FILE_WARNING" ]; then
+        err "    Commit continuing in 5 seconds..."
+        sleep 5
+    fi
+fi
+
+# Build Xcode project from Unity
+bin/build-unity
+UNITY_BUILD=$?
+if [ "${UNITY_BUILD}" -ne 0 ]; then
+    err "ERROR:"
+    err "    Unity project failed to build."
+    exit 12
+fi
+
+# Run Jshint
+pushd ${BASE_PATH}/parse/ &> /dev/null
+node_modules/.bin/jshint *
+if [ $? -ne 0 ]; then
+    err "ERROR:"
+    err "    aborting on jshint errors."
+    exit 20
+fi
+popd &> /dev/null
