@@ -15,10 +15,11 @@
  * 4  - environment is missing required configuration parameter
  */
 
-// All paths relative to 'project_root/bin'
-var CONFIG_FILE = __dirname + '/../etc/config.json';
-var PARSE_TEMPLATE_FILE = __dirname + '/../etc/global.json.ejs';
-var PARSE_CONFIG_FILE = __dirname + '/../parse/config/global.json';
+// __dirname = [..]/supermodule/tools/bin
+var ROOT_DIR = __dirname + '/../../';
+var CONFIG_FILE = ROOT_DIR + 'etc/config.json';
+var PARSE_TEMPLATE_FILE = ROOT_DIR + 'etc/global.json.ejs';
+var PARSE_CONFIG_FILE = ROOT_DIR + 'parse/config/global.json';
 var ENVIRONMENTS = {};
 
 var _ = require('underscore');

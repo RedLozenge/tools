@@ -1,5 +1,5 @@
 #!/bin/bash
-BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Install precommit hooks
-$BASE_PATH/bin/copy-hooks
+$BASE_PATH/copy-hooks

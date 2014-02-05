@@ -1,12 +1,12 @@
 #!/bin/bash
 
-BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
 
 pushd "${BASE_PATH}" &> /dev/null
 
-bin/ensure-unity-is-closed
+tools/bin/ensure-unity-is-closed
 if [ $? -ne 0 ]; then
     echo "error: unity is still running, aborting build."
     exit 1
