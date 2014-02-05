@@ -5,6 +5,7 @@
 # 11 - Xcode project files detected
 # 12 - Unity build failed
 # 20 - jshint error
+# 21 - NPM not installed
 
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 UNTRACKED_FILE_WARNING=3
@@ -59,20 +60,33 @@ if [ "$UNTRACKED_COUNT" -gt 0 ]; then
 fi
 
 # Build Xcode project from Unity
-bin/build-unity
-UNITY_BUILD=$?
-if [ "${UNITY_BUILD}" -ne 0 ]; then
-    err "ERROR:"
-    err "    Unity project failed to build."
-    exit 12
+CHANGED_UNITY_FILES="`git status | egrep '(Assets/|Library/|ProjectSettings/)'`"
+if [ ! -z "${CHANGED_UNITY_FILES}" ]; then
+    bin/build-unity
+    UNITY_BUILD=$?
+    if [ "${UNITY_BUILD}" -ne 0 ]; then
+        err "ERROR:"
+        err "    Unity project failed to build."
+        exit 12
+    fi
 fi
 
+# Update packages
+which npm &> /dev/null
+if [ $? -ne 0 ]; then
+    err "ERROR:"
+    err "    NPM is not installed. Please install Node.js to supply it."
+    err "    See: http://nodejs.org/"
+    exit 21
+fi
+npm install &> /dev/null
+
 # Run Jshint
-pushd ${BASE_PATH}/parse/ &> /dev/null
-node_modules/.bin/jshint *
+node_modules/.bin/jshint \
+    * \
+    bin/configure-app
 if [ $? -ne 0 ]; then
     err "ERROR:"
     err "    aborting on jshint errors."
     exit 20
 fi
-popd &> /dev/null

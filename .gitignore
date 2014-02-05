@@ -1,0 +1,10 @@
+##############
+# Editor files
+
+*.swp
+
+##############
+# Config files
+
+etc/config.json
+

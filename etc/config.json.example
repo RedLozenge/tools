@@ -1,0 +1,10 @@
+{
+    "sandbox": {
+        "parseAppName":       "",
+        "parseAppId":         "",
+        "parseClientKey":     "",
+        "parseJavascriptKey": "",
+        "parseRestKey":       "",
+        "parseMasterKey":     ""
+    }
+}

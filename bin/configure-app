@@ -1,0 +1,141 @@
+#!/usr/local/bin/node
+'use strict';
+
+/* (c) 2014 Red Lozenge, Inc 
+ * alexi@redlozenge.com
+ *
+ * This script will create a Parse config based on a configuration file that
+ * should exist outside of source control. Useful for allowing users to sandbox
+ * your application.
+ *
+ * Return error codes:
+ * 1  - incorrect usage
+ * 2  - config file unreadable
+ * 3  - invalid environment specified
+ * 4  - environment is missing required configuration parameter
+ */
+
+// All paths relative to 'project_root/bin'
+var CONFIG_FILE = __dirname + '/../etc/config.json';
+var PARSE_TEMPLATE_FILE = __dirname + '/../etc/global.json.ejs';
+var PARSE_CONFIG_FILE = __dirname + '/../parse/config/global.json';
+var ENVIRONMENTS = {};
+
+var _ = require('underscore');
+var optimist = require('optimist');
+var fs = require('fs');
+var path = require('path');
+var assert = require('assert');
+
+/************************
+ * Functions
+ */
+
+function loadEnvironments() {
+    try {
+        ENVIRONMENTS = require(CONFIG_FILE);
+    } catch (err) {
+        console.error(err);
+        console.error('Error loading the config file. Please verify that it exists and is well formed.');
+        console.error('    ' + CONFIG_FILE);
+        process.exit(2);
+    }
+}
+
+function configureParse(environment) {
+    try {
+        assert(environment.parseAppId, 'parseAppId');
+        assert(environment.parseAppName, 'parseAppName');
+        assert(environment.parseMasterKey, 'parseMasterKey');
+    } catch (missingParameter) {
+        console.error('ERROR: environment is missing required parameter: ' +
+            missingParameter.message);
+        process.exit(4);
+    }
+
+    if (!environment.parseVersion) {
+        // Set a default Parse version if one is not supplied in the config
+        environment.parseVersion = '1.2.12';
+    }
+
+    var parseTemplateFile = fs.readFileSync(PARSE_TEMPLATE_FILE, 'utf8');
+    var parseTemplate = _.template(parseTemplateFile);
+    var parseConfig = parseTemplate(environment);
+
+    // Make Parse config directory if it doesn't exist
+    var configPath = path.dirname(PARSE_CONFIG_FILE);
+    if (!fs.exists(configPath)) {
+        fs.mkdirSync(configPath);
+    }
+
+    fs.writeFileSync(PARSE_CONFIG_FILE,
+                     parseConfig,
+                     {
+                         encoding: 'utf8'
+                     },
+                     function(error) {
+                         if (error) {
+                             console.error('ERROR: cannot write file');
+                             console.error(error);
+                         }
+                     }
+    );
+
+}
+
+function configureEnvironment(environment) {
+    configureParse(environment);
+}
+
+/************************
+ * Main
+ */
+
+var environment;
+loadEnvironments();
+
+// Parse command line args
+var opt = optimist.
+    usage('Configures your checkout for a particular environment.' +
+           '\nUsage: $0 ENVIRONMENT_NAME').
+    alias('h', 'help').
+    describe('h', 'Command help.').
+    alias('l', 'list-environments').
+    describe('l', 'list available environments.');
+var argv = opt.argv;
+
+// Command line option checking
+if (argv.h) {
+    opt.showHelp();
+    process.exit(0);
+}
+
+if (argv.l) {
+    // list environments and exit
+    console.log('Available environments:');
+    for (var environment in ENVIRONMENTS) {
+        console.log('    ' + environment);
+    }
+    process.exit(0);
+}
+
+if (argv._.length === 1) {
+    var requestedEnvironment = argv._[0];
+    if (!ENVIRONMENTS.hasOwnProperty(requestedEnvironment)) {
+        console.error('ERROR: The environment you specified (' +
+                      requestedEnvironment + ') is not valid.');
+        process.exit(3);
+    } else {
+        environment = ENVIRONMENTS[argv._[0]];
+    }
+} else {
+    console.error('You must supply an environment name.');
+    process.exit(1);
+}
+
+// Configure the application based on the requested environment
+var result = configureEnvironment(environment);
+
+process.exit(result);
+
+// vim: syntax=javascript

@@ -2,6 +2,7 @@
 
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )"
 BUILD_LOG="build.log"
+VERBOSE=""
 
 pushd "${BASE_PATH}" &> /dev/null
 
@@ -9,6 +10,10 @@ bin/ensure-unity-is-closed
 if [ $? -ne 0 ]; then
     echo "error: unity is still running, aborting build."
     exit 1
+fi
+
+if [ "$1"=="-v" ]; then
+    VERBOSE="true"
 fi
 
 # Remove old build log
@@ -30,7 +35,19 @@ UNITY_BUILD_STATUS=$?
 
 # Check build status
 if [ $UNITY_BUILD_STATUS -ne 0 ]; then
+    # Check to see if the build failed because don't have UnityPro, give notice
+    # and exit
+    grep "requires Unity PRO" "${BUILD_LOG}" &> /dev/null
+    if [ $? -eq 0 ]; then
+        echo "warning: cannot build from the command line because you aren't using Unity Pro."
+        echo "         continuing anyway."
+        exit 0
+    fi
+
     echo "error: build failed, see log file '${BUILD_LOG}'"
+    if [ ! -z "${VERBOSE}" ]; then
+        cat "${BUILD_LOG}"
+    fi
     exit 1
 else
     echo "build succeeded"
