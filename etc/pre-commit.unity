@@ -23,6 +23,9 @@ if [ $? -gt 0 ]; then
     exit $?
 fi
 
+# Update submodules
+git submodule update
+
 # Check for running Unity
 tools/bin/ensure-unity-is-closed
 if [ $? -ne 0 ]; then

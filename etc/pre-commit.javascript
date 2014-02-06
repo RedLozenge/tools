@@ -19,6 +19,9 @@ if [ $? -gt 0 ]; then
     exit $?
 fi
 
+# Update tools submodule
+git submodule update
+
 # Update packages
 which npm &> /dev/null
 if [ $? -ne 0 ]; then
