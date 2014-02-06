@@ -1,16 +1,21 @@
 #!/bin/bash
+
+# Navigate to the supermodule's root
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
+pushd ${BASE_PATH} &> /dev/null
 
 HOOKS_INSTALLED=0
-HOOK_FILES="pre-commit post-commit"
 
-for HOOK_FILE in ${HOOK_FILES}; do
-    # Install precommit hooks
-    diff $BASE_PATH/etc/${HOOK_FILE}.skel $BASE_PATH/.git/hooks/${HOOK_FILE} &> /dev/null
+# Find all files that match "*-commit*"
+HOOK_FILE_TEMPLATES="`ls -1 etc/*-commit* | cut -d"/" -f 2`"
+
+for HOOK_FILE_TEMPLATE in ${HOOK_FILE_TEMPLATES}; do
+    HOOK_FILE="`echo ${HOOK_FILE_TEMPLATE} | egrep -o '^[a-zA-Z/-]+'`"
+    diff etc/${HOOK_FILE_TEMPLATE} .git/hooks/${HOOK_FILE} &> /dev/null
     if [ $? -ne 0 ]; then
-        echo "installing new hook file: $HOOK_FILE"
-        install $BASE_PATH/etc/${HOOK_FILE}.skel $BASE_PATH/.git/hooks/${HOOK_FILE} &> /dev/null
-        chmod 755 $BASE_PATH/.git/hooks/${HOOK_FILE}
+        echo "installing file"
+        install etc/${HOOK_FILE_TEMPLATE} .git/hooks/${HOOK_FILE}
+        chmod 755 .git/hooks/${HOOK_FILE}
 
         HOOKS_INSTALLED=$(( $HOOKS_INSTALLED + 1 ))
     fi
