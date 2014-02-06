@@ -13,7 +13,7 @@ for HOOK_FILE_TEMPLATE in ${HOOK_FILE_TEMPLATES}; do
     HOOK_FILE="`echo ${HOOK_FILE_TEMPLATE} | egrep -o '^[a-zA-Z/-]+'`"
     diff etc/${HOOK_FILE_TEMPLATE} .git/hooks/${HOOK_FILE} &> /dev/null
     if [ $? -ne 0 ]; then
-        echo "installing file"
+        echo "installing ${HOOK_FILE}"
         install etc/${HOOK_FILE_TEMPLATE} .git/hooks/${HOOK_FILE}
         chmod 755 .git/hooks/${HOOK_FILE}
 
