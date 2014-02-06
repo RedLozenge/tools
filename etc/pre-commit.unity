@@ -4,8 +4,6 @@
 # 10 - Unity still running
 # 11 - Xcode project files detected
 # 12 - Unity build failed
-# 20 - jshint error
-# 21 - NPM not installed
 
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 UNTRACKED_FILE_WARNING=3
@@ -18,7 +16,7 @@ function err() {
 pushd $BASE_PATH &> /dev/null
 
 # Copy newest version of hooks
-bin/copy-hooks
+tools/bin/copy-hooks
 if [ $? -gt 0 ]; then
     # run the new hook script
     .git/hooks/pre-commit
@@ -26,7 +24,7 @@ if [ $? -gt 0 ]; then
 fi
 
 # Check for running Unity
-bin/ensure-unity-is-closed
+tools/bin/ensure-unity-is-closed
 if [ $? -ne 0 ]; then
     err "ERROR committing:"
     err "    Unity is still running. Please save & shut it down before committing."
@@ -69,24 +67,4 @@ if [ ! -z "${CHANGED_UNITY_FILES}" ]; then
         err "    Unity project failed to build."
         exit 12
     fi
-fi
-
-# Update packages
-which npm &> /dev/null
-if [ $? -ne 0 ]; then
-    err "ERROR:"
-    err "    NPM is not installed. Please install Node.js to supply it."
-    err "    See: http://nodejs.org/"
-    exit 21
-fi
-npm install &> /dev/null
-
-# Run Jshint
-node_modules/.bin/jshint \
-    * \
-    bin/configure-app
-if [ $? -ne 0 ]; then
-    err "ERROR:"
-    err "    aborting on jshint errors."
-    exit 20
 fi
