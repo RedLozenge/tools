@@ -1,10 +1,8 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Move to supermodule and get submodules
+# Move to supermodule
 pushd "${BASE_PATH}/../../" &> /dev/null
-git submodule init
-git submodule update
 
 # Install precommit hooks
 "${BASE_PATH}"/copy-hooks
