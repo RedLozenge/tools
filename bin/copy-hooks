@@ -2,7 +2,7 @@
 
 # Navigate to the supermodule's root
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
-pushd ${BASE_PATH} &> /dev/null
+pushd "${BASE_PATH}" &> /dev/null
 
 HOOKS_INSTALLED=0
 

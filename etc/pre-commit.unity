@@ -13,7 +13,7 @@ function err() {
     echo "[31;01m$@[0m" 1>&2
 }
 
-pushd $BASE_PATH &> /dev/null
+pushd "${BASE_PATH}" &> /dev/null
 
 # Copy newest version of hooks
 tools/bin/copy-hooks
