@@ -13,6 +13,7 @@
  * 2  - config file unreadable
  * 3  - invalid environment specified
  * 4  - environment is missing required configuration parameter
+ * 5  - required modules not found (needs `npm install`)
  */
 
 // __dirname = [..]/supermodule/tools/bin
@@ -22,11 +23,17 @@ var PARSE_TEMPLATE_FILE = ROOT_DIR + 'etc/global.json.ejs';
 var PARSE_CONFIG_FILE = ROOT_DIR + 'parse/config/global.json';
 var ENVIRONMENTS = {};
 
-var _ = require('underscore');
-var optimist = require('optimist');
-var fs = require('fs');
-var path = require('path');
-var assert = require('assert');
+try {
+    var _ = require('underscore');
+    var optimist = require('optimist');
+    var fs = require('fs');
+    var path = require('path');
+    var assert = require('assert');
+} catch(error) {
+    console.error('ERROR: Required modules not found.');
+    console.error('       Try running: `npm install` in the supermodule root');
+    process.exit(5);
+}
 
 /************************
  * Functions
