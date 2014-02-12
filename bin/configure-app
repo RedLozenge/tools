@@ -72,7 +72,7 @@ function configureParse(environment) {
 
     // Make Parse config directory if it doesn't exist
     var configPath = path.dirname(PARSE_CONFIG_FILE);
-    if (!fs.exists(configPath)) {
+    if (!fs.existsSync(configPath)) {
         fs.mkdirSync(configPath);
     }
 
