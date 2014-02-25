@@ -24,6 +24,10 @@ while getopts "vt:" OPT; do
     esac
 done
 
+if [ ! -z "${VERBOSE}" ]; then
+    set -x
+fi
+
 # Remove old build log
 rm "${BUILD_LOG}" &> /dev/null || true
 
