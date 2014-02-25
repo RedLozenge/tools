@@ -3,6 +3,7 @@
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
+TARGET="iOS"
 
 pushd "${BASE_PATH}" &> /dev/null
 
@@ -12,9 +13,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ "$1"=="-v" ]; then
-    VERBOSE="true"
-fi
+while getopts "vt:" OPT; do
+    case "$OPT" in
+        v)
+            VERBOSE="true"
+            ;;
+        t)
+            TARGET="${OPTARG}"
+            ;;
+    esac
+done
 
 # Remove old build log
 rm "${BUILD_LOG}" &> /dev/null || true
@@ -26,6 +34,7 @@ echo "building Xcode project from Unity..."
     -quit \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
+    -buildTarget "${TARGET}" \
     -executeMethod BuildScript.PerformBuild
 
 # Check to see if iOS built properly... in a gross way, since Unity doesn't
