@@ -60,6 +60,10 @@ echo "building Xcode project from Unity..."
 grep "Completed 'Build.Player.iPhonePlayer'" "${BUILD_LOG}" &> /dev/null
 UNITY_BUILD_STATUS=$?
 
+if [ ! -z "${VERBOSE}" ]; then
+    cat "${BUILD_LOG}"
+fi
+
 # Check build status
 if [ $UNITY_BUILD_STATUS -ne 0 ]; then
     # Check to see if the build failed because don't have UnityPro, give notice
@@ -72,9 +76,6 @@ if [ $UNITY_BUILD_STATUS -ne 0 ]; then
     fi
 
     echo "error: build failed, see log file '${BUILD_LOG}'"
-    if [ ! -z "${VERBOSE}" ]; then
-        cat "${BUILD_LOG}"
-    fi
     exit 1
 else
     echo "build succeeded"
