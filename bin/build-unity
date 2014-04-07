@@ -3,6 +3,18 @@
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
+TARGET=""
+
+
+function usage() {
+    echo "$0 [-v] [-t (iOS|WebPlayer|Android)]"
+    echo
+    echo "Options:"
+    echo "    -h    how you get this message"
+    echo "    -t    explicitly set build target"
+    echo "    -v    be verbose"
+    exit 0
+}
 
 pushd "${BASE_PATH}" &> /dev/null
 
@@ -12,8 +24,22 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-if [ "$1"=="-v" ]; then
-    VERBOSE="true"
+while getopts "hvt:" OPT; do
+    case "$OPT" in
+        v)
+            VERBOSE="true"
+            ;;
+        t)
+            TARGET="-buildTarget ${OPTARG}"
+            ;;
+        h)
+            usage
+            ;;
+    esac
+done
+
+if [ ! -z "${VERBOSE}" ]; then
+    set -x
 fi
 
 # Remove old build log
@@ -26,12 +52,17 @@ echo "building Xcode project from Unity..."
     -quit \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
+    "${TARGET}" \
     -executeMethod BuildScript.PerformBuild
 
 # Check to see if iOS built properly... in a gross way, since Unity doesn't
 # believe in error codes.
 grep "Completed 'Build.Player.iPhonePlayer'" "${BUILD_LOG}" &> /dev/null
 UNITY_BUILD_STATUS=$?
+
+if [ ! -z "${VERBOSE}" ]; then
+    cat "${BUILD_LOG}"
+fi
 
 # Check build status
 if [ $UNITY_BUILD_STATUS -ne 0 ]; then
@@ -45,9 +76,6 @@ if [ $UNITY_BUILD_STATUS -ne 0 ]; then
     fi
 
     echo "error: build failed, see log file '${BUILD_LOG}'"
-    if [ ! -z "${VERBOSE}" ]; then
-        cat "${BUILD_LOG}"
-    fi
     exit 1
 else
     echo "build succeeded"
