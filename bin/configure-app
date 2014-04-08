@@ -21,8 +21,8 @@ var ROOT_DIR = __dirname + '/../../';
 var CONFIG_FILE = ROOT_DIR + 'etc/config.json';
 var PARSE_TEMPLATE_FILE = ROOT_DIR + 'etc/global.json.ejs';
 var PARSE_CONFIG_FILE = ROOT_DIR + 'parse/config/global.json';
-var GA_TEMPLATE_FILE = ROOT_DIR + 'etc/googleanalytics.js.ejs';
-var GA_FILE = ROOT_DIR + 'app/scripts/googleanalytics.js';
+var WEB_CONFIG_TEMPLATE_FILE = ROOT_DIR + 'etc/web-config.js.ejs';
+var WEB_CONFIG_FILE = ROOT_DIR + 'app/scripts/web-config.js';
 var ENVIRONMENTS = {};
 
 try {
@@ -77,16 +77,18 @@ function loadEnvironments() {
     }
 }
 
-function configureGoogleAnalytics(environment) {
+function configureWebsite(environment) {
     try {
         assert(environment.googleAnalytics, 'googleAnalytics');
+        assert(environment.parseAppId, 'parseAppId');
+        assert(environment.parseClientKey, 'parseClientKey');
     } catch (missingParameter) {
         console.error('ERROR: environment is missing required parameter: ' +
             missingParameter.message);
         process.exit(4);
     }
 
-    writeFileFromTemplate(GA_TEMPLATE_FILE, GA_FILE);
+    writeFileFromTemplate(WEB_CONFIG_TEMPLATE_FILE, WEB_CONFIG_FILE);
 }
 
 function configureParse(environment) {
@@ -110,7 +112,7 @@ function configureParse(environment) {
 
 function configureEnvironment(environment) {
     configureParse(environment);
-    configureGoogleAnalytics(environment);
+    configureWebsite(environment);
 }
 
 /************************
