@@ -65,7 +65,7 @@ echo "building Xcode project from Unity..."
 
 # Check to see if built properly... in a gross way, since Unity doesn't
 # believe in error codes.
-grep "Completed 'Build.Player.'" "${BUILD_LOG}" &> /dev/null
+grep "Completed 'Build.Player." "${BUILD_LOG}" &> /dev/null
 UNITY_BUILD_STATUS=$?
 
 if [ ! -z "${VERBOSE}" ]; then
