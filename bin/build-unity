@@ -3,17 +3,21 @@
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
-TARGET=""
-
+TARGET="iOS"
+VALID_TARGETS="(iOS|WebPlayer|Android)"
 
 function usage() {
-    echo "$0 [-v] [-t (iOS|WebPlayer|Android)]"
+    echo "$0 [-v] [-t ${VALID_TARGETS}]"
     echo
     echo "Options:"
     echo "    -h    how you get this message"
     echo "    -t    explicitly set build target"
     echo "    -v    be verbose"
     exit 0
+}
+
+function err() {
+    echo "$@" 1>&2
 }
 
 pushd "${BASE_PATH}" &> /dev/null
@@ -30,7 +34,12 @@ while getopts "hvt:" OPT; do
             VERBOSE="true"
             ;;
         t)
-            TARGET="-buildTarget ${OPTARG}"
+            echo "${OPTARG}" | egrep -o "^${VALID_TARGETS}$" &> /dev/null ; RESULT=$?
+            if [ $RESULT -ne 0 ]; then
+                err "Invalid build target: ${OPTARG}"
+                usage
+            fi
+            TARGET="${OPTARG}"
             ;;
         h)
             usage
@@ -52,12 +61,11 @@ echo "building Xcode project from Unity..."
     -quit \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
-    "${TARGET}" \
-    -executeMethod BuildScript.PerformBuild
+    -executeMethod "BuildScript.Perform${TARGET}Build"
 
-# Check to see if iOS built properly... in a gross way, since Unity doesn't
+# Check to see if built properly... in a gross way, since Unity doesn't
 # believe in error codes.
-grep "Completed 'Build.Player.iPhonePlayer'" "${BUILD_LOG}" &> /dev/null
+grep "Completed 'Build.Player.'" "${BUILD_LOG}" &> /dev/null
 UNITY_BUILD_STATUS=$?
 
 if [ ! -z "${VERBOSE}" ]; then
@@ -70,12 +78,12 @@ if [ $UNITY_BUILD_STATUS -ne 0 ]; then
     # and exit
     grep "requires Unity PRO" "${BUILD_LOG}" &> /dev/null
     if [ $? -eq 0 ]; then
-        echo "warning: cannot build from the command line because you aren't using Unity Pro."
-        echo "         continuing anyway."
+        err "warning: cannot build from the command line because you aren't using Unity Pro."
+        err "         continuing anyway."
         exit 0
     fi
 
-    echo "error: build failed, see log file '${BUILD_LOG}'"
+    err "error: build failed, see log file '${BUILD_LOG}'"
     exit 1
 else
     echo "build succeeded"
