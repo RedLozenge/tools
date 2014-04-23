@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Script to properly sign an .APK built from Unity, which may not be signed.
+# Mostly ripped from:
+#   http://forum.unity3d.com/threads/162448-Signing-Package-from-the-command-line
+
+# Error codes:
+#   1 - APK file not found
+#   2 - Keystore file not found
+
+APK_FILE="$1"
+KEYSTORE_FILE="$2"
+KEYSTORE_PASS="$3"
+KEYSTORE_ALIAS="$4"
+
+function err() {
+    echo "$@" 1>&2
+}
+
+if [ ! -f "${APK_FILE}" ]; then
+    err "APK file not found: ${APK_FILE}" 
+    exit 1
+fi
+
+if [ ! -f "${KEYSTORE_FILE}" ]; then
+    err "Keystore file not found: ${KEYSTORE_FILE}"
+    exit 2
+fi
+
+zip -d "${APK_FILE}" "META-INF/*"
+
+jarsigner \
+    -verbose \
+    -sigalg MD5withRSA \
+    -digestalg SHA1 \
+    -keystore "${KEYSTORE_FILE}" \
+    -storepass "${KEYSTORE_PASS}" \
+    "${APK_FILE}" \
+    "${KEYSTORE_ALIAS}"
+
