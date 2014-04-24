@@ -11,7 +11,7 @@ APK_FILE="habitmonster.apk"
 RESIGN_APK_SETTINGS=""
 
 function usage() {
-    echo "$0 [-v] [-t ${VALID_TARGETS}] [-a \"resign-apk settings\"]"
+    echo "$0 [-v] [-t ${VALID_TARGETS}]"
     echo
     echo "Options:"
     echo "    -h    how you get this message"
@@ -47,6 +47,10 @@ while getopts "hvt:" OPT; do
             ;;
         h)
             usage
+            ;;
+        \?)
+            usage
+            exit 1
             ;;
     esac
 done
