@@ -63,7 +63,7 @@ fi
 rm "${BUILD_LOG}" &> /dev/null || true
 
 # Execute Unity build
-echo "building Xcode project from Unity..."
+echo "building ${TARGET} project from Unity..."
 /Applications/Unity/Unity.app/Contents/MacOS/Unity \
     -batchmode \
     -quit \
