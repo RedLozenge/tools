@@ -6,10 +6,15 @@ VERBOSE=""
 TARGET="iOS"
 VALID_TARGETS="(iOS|WebPlayer|Android)"
 
+# Android specific stuff
+APK_FILE="habitmonster.apk"
+RESIGN_APK_SETTINGS=""
+
 function usage() {
-    echo "$0 [-v] [-t ${VALID_TARGETS}]"
+    echo "$0 [-v] [-t ${VALID_TARGETS}] [-a \"resign-apk settings\"]"
     echo
     echo "Options:"
+    echo "    -a    resign-apk settings (see \`resign-apk\` for details)"
     echo "    -h    how you get this message"
     echo "    -t    explicitly set build target"
     echo "    -v    be verbose"
@@ -28,8 +33,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-while getopts "hvt:" OPT; do
+while getopts "a:hvt:" OPT; do
     case "$OPT" in
+        a)
+            RESIGN_APK_SETTINGS="${OPTARG}"
+            ;;
         v)
             VERBOSE="true"
             ;;
@@ -85,7 +93,15 @@ if [ $UNITY_BUILD_STATUS -ne 0 ]; then
 
     err "error: build failed, see log file '${BUILD_LOG}'"
     exit 1
-else
-    echo "build succeeded"
-    exit 0
 fi
+
+# Target-specific build steps
+if [ "${TARGET}" == "Android" -a
+     ! -z "${RESIGN_APK_SETTINGS}" ]; then
+
+    echo "Resigning APK..."
+    tools/bin/resign-apk "${RESIGN_APK_SETTINGS}"
+fi
+
+echo "build succeeded"
+exit 0

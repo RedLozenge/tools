@@ -7,25 +7,45 @@
 # Error codes:
 #   1 - APK file not found
 #   2 - Keystore file not found
+#   3 - Android SDK directory not found
 
+ANDROID_SDK="~/bin/android-sdk/"
 APK_FILE="$1"
 KEYSTORE_FILE="$2"
 KEYSTORE_PASS="$3"
 KEYSTORE_ALIAS="$4"
 
+# Functions
+
 function err() {
     echo "$@" 1>&2
 }
 
+function usage() {
+    echo
+    echo "usage: $0 APK_FILE KEYSTORE_FILE KEYSTORE_PASSWORD KEYSTORE_ALIAS"
+}
+
+# Error checking
+
 if [ ! -f "${APK_FILE}" ]; then
-    err "APK file not found: ${APK_FILE}" 
+    err "APK file not found: ${APK_FILE}"
+    usage
     exit 1
 fi
 
 if [ ! -f "${KEYSTORE_FILE}" ]; then
     err "Keystore file not found: ${KEYSTORE_FILE}"
+    usage
     exit 2
 fi
+
+if [ ! -d "${ANDROID_SDK}" ]; then
+    err "Android SDK directory not found: $ANDROID_SDK"
+    exit 3
+fi
+
+# Main
 
 zip -d "${APK_FILE}" "META-INF/*"
 
@@ -38,3 +58,4 @@ jarsigner \
     "${APK_FILE}" \
     "${KEYSTORE_ALIAS}"
 
+${ANDROID_SDK}sdk/tools/zipalign -v 4 "${APK_FILE}" "${APK_FILE}"
