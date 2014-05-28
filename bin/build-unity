@@ -3,6 +3,7 @@
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
+PRODUCTION=""
 TARGET="iOS"
 VALID_TARGETS="(iOS|WebPlayer|Android)"
 
@@ -15,6 +16,7 @@ function usage() {
     echo
     echo "Options:"
     echo "    -h    how you get this message"
+    echo "    -p    run a production build (default = development)"
     echo "    -t    explicitly set build target"
     echo "    -v    be verbose"
     exit 0
@@ -32,10 +34,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-while getopts "hvt:" OPT; do
+while getopts "hvpt:" OPT; do
     case "$OPT" in
         v)
             VERBOSE="true"
+            ;;
+        p)
+            PRODUCTION="Production"
             ;;
         t)
             echo "${OPTARG}" | egrep -o "^${VALID_TARGETS}$" &> /dev/null ; RESULT=$?
@@ -69,7 +74,7 @@ echo "building Xcode project from Unity..."
     -quit \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
-    -executeMethod "BuildScript.Perform${TARGET}Build"
+    -executeMethod "BuildScript.Perform${PRODUCTION}${TARGET}Build"
 
 # Check to see if built properly... in a gross way, since Unity doesn't
 # believe in error codes.
