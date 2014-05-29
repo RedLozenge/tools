@@ -3,27 +3,43 @@
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/../.. && pwd )"
 BUILD_LOG="build.log"
 VERBOSE=""
-PRODUCTION=""
-TARGET="iOS"
+DEFAULT_ENVIRONMENT="Development"
+ENVIRONMENT=""
+VALID_ENVIRONMENTS="(Production|Development)"
+DEFAULT_TARGET="iOS"
 VALID_TARGETS="(iOS|WebPlayer|Android)"
+TARGET=""
 
 # Android specific stuff
 APK_FILE="habitmonster.apk"
 RESIGN_APK_SETTINGS=""
 
 function usage() {
-    echo "$0 [-v] [-t ${VALID_TARGETS}]"
+    echo "$0 [-v] [-t ${VALID_TARGETS}] [-e ${VALID_ENVIRONMENTS}]"
     echo
     echo "Options:"
     echo "    -h    how you get this message"
-    echo "    -p    run a production build (default = development)"
-    echo "    -t    explicitly set build target"
+    echo "    -e    set build environment (default = ${DEFAULT_ENVIRONMENT})"
+    echo "    -t    set build target (default = ${DEFAULT_TARGET})"
     echo "    -v    be verbose"
     exit 0
 }
 
 function err() {
     echo "$@" 1>&2
+}
+
+function validate() {
+    TEST_STRING="$1"
+    VALIDATOR="$2"
+    ERR_MESSAGE="$3"
+
+    echo "${TEST_STRING}" | egrep -o "^${VALIDATOR}$" &> /dev/null ; RESULT=$?
+    if [ $RESULT -ne 0 ]; then
+        err "${ERR_MESSAGE}: ${TEST_STRING}"
+        usage
+        exit 1
+    fi
 }
 
 pushd "${BASE_PATH}" &> /dev/null
@@ -34,20 +50,15 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-while getopts "hvpt:" OPT; do
+while getopts "hve:t:" OPT; do
     case "$OPT" in
         v)
             VERBOSE="true"
             ;;
-        p)
-            PRODUCTION="Production"
+        e)
+            ENVIRONMENT="${OPTARG}"
             ;;
         t)
-            echo "${OPTARG}" | egrep -o "^${VALID_TARGETS}$" &> /dev/null ; RESULT=$?
-            if [ $RESULT -ne 0 ]; then
-                err "Invalid build target: ${OPTARG}"
-                usage
-            fi
             TARGET="${OPTARG}"
             ;;
         h)
@@ -64,6 +75,18 @@ if [ ! -z "${VERBOSE}" ]; then
     set -x
 fi
 
+# Set defaults
+if [ -z "${ENVIRONMENT}" ]; then
+    ENVIRONMENT="${DEFAULT_ENVIRONMENT}"
+fi
+if [ -z "${TARGET}" ]; then
+    TARGET="${DEFAULT_TARGET}"
+fi
+
+# Validate options
+validate "${ENVIRONMENT}" "${VALID_ENVIRONMENTS}" "Invalid environment"
+validate "${TARGET}" "${VALID_TARGETS}" "Invalid target"
+
 # Remove old build log
 rm "${BUILD_LOG}" &> /dev/null || true
 
@@ -74,7 +97,7 @@ echo "building ${TARGET} project from Unity..."
     -quit \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
-    -executeMethod "BuildScript.Perform${PRODUCTION}${TARGET}Build"
+    -executeMethod "BuildScript.Perform${ENVIRONMENT}${TARGET}Build"
 
 # Check to see if built properly... in a gross way, since Unity doesn't
 # believe in error codes.
