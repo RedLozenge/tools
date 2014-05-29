@@ -22,7 +22,6 @@ function usage() {
     echo "    -e    set build environment (default = ${DEFAULT_ENVIRONMENT})"
     echo "    -t    set build target (default = ${DEFAULT_TARGET})"
     echo "    -v    be verbose"
-    exit 0
 }
 
 function err() {
@@ -63,6 +62,7 @@ while getopts "hve:t:" OPT; do
             ;;
         h)
             usage
+            exit 0
             ;;
         \?)
             usage
