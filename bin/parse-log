@@ -1,0 +1,16 @@
+#!/usr/local/bin/node
+
+var ParseLogger = require('./parse-logger');
+var assert = require('assert');
+var argv = require('yargs')
+    .usage('usage: $0 [application id] [master key]')
+    .argv;
+
+var applicationId = argv._[0];
+var masterKey = argv._[1];
+
+assert(applicationId, 'application id required');
+assert(masterKey, 'master key required');
+
+var logger = new ParseLogger(applicationId, masterKey);
+logger.tailLog();

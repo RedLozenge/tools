@@ -1,5 +1,9 @@
 'use strict'
 
+/**
+ * Javascript class to interact with a Parse application's logs.
+ */
+
 var assert = require('assert');
 var _ = require('underscore');
 var Parse = require('parse').Parse;
@@ -54,7 +58,7 @@ var ParseLogger = function(applicationId,
         }
     }
 
-    function fetchLog(startTime, lines, level) {
+    this.fetchLog = function(startTime, lines, level) {
         var requestParameters = {};
 
         if (lines === undefined) {
@@ -106,15 +110,15 @@ var ParseLogger = function(applicationId,
 
         return promise;
     }
-    this.fetchLog = fetchLog;
 
-    function tailLog(startTime) {
+    this.tailLog = function(startTime) {
         // Set up a higher scope variable since setInterval doesn't play nice
         // with parameters
         var lastTailStartTime = startTime;
+        var self = this;
 
         function loopableTail() {
-            fetchLog(lastTailStartTime, 10).then(
+            self.fetchLog(lastTailStartTime, 10).then(
                 function(messages) {
                     if (messages.length > 0) {
                         // grab the last time in the messages to use as the new
@@ -136,7 +140,6 @@ var ParseLogger = function(applicationId,
             process.exit();
         });
     }
-    this.tailLog = tailLog;
 }
 
 module.exports = ParseLogger;
