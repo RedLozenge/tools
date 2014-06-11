@@ -1,1 +1,1 @@
-parse-logger: node bin/heroku-log-tailer.js -t
+parselogger: node bin/heroku-log-tailer.js -t
