@@ -2,7 +2,9 @@
   "name": "redlozenge-tools",
   "version": "0.0.1",
   "description": "A set of tools for working with Parse, Unity, etc.",
-  "engine": "node 0.10.22",
+  "engines": {
+      "node": "0.10.22"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
