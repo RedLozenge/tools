@@ -11,10 +11,17 @@ var DEFAULT_LINES = 10;
 
 var yargs = require('yargs')
     .usage('usage: $0 [application id] [master key] [OPTIONS]')
+    // Force tail
     .alias('t', 'tail')
     .describe('t', 'continuously tail log')
+    // Last 'n' lines of logging
     .default('n', DEFAULT_LINES)
     .describe('n', 'display last COUNT lines of log')
+    // Log level
+    .alias('l', 'level')
+    .default('l', 'INFO')
+    .describe('l', 'set log level (INFO or ERROR)')
+    // CLI help
     .alias('h', 'help')
     .describe('h', 'display this usage message');
 
@@ -24,7 +31,7 @@ var applicationId = argv._[0];
 var masterKey = argv._[1];
 var tail = argv.t;
 var count = argv.n;
-var level = 'INFO';
+var level = argv.l;
 
 // Grab application configuration from the environment if available
 if (process.env.PARSE_APPLICATION_ID) {
