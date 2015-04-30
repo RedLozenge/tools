@@ -5,6 +5,8 @@
         "parseClientKey":     "",
         "parseJavascriptKey": "",
         "parseRestKey":       "",
-        "parseMasterKey":     ""
+        "parseMasterKey":     "",
+        "parseVersion":       "",
+        "mandrillKey":        ""
     }
 }
