@@ -19,10 +19,16 @@
 // __dirname = [..]/supermodule/tools/bin
 var ROOT_DIR = __dirname + '/../../';
 var CONFIG_FILE = ROOT_DIR + 'etc/config.json';
+
 var PARSE_TEMPLATE_FILE = ROOT_DIR + 'etc/global.json.ejs';
 var PARSE_CONFIG_FILE = ROOT_DIR + 'parse/config/global.json';
+
+var CLOUDCODE_TEMPLATE_FILE = ROOT_DIR + 'etc/cloudcode-config.js.ejs';
+var CLOUDCODE_CONFIG_FILE = ROOT_DIR + 'parse/cloud/config.js';
+
 var WEB_CONFIG_TEMPLATE_FILE = ROOT_DIR + 'etc/web-config.js.ejs';
 var WEB_CONFIG_FILE = ROOT_DIR + 'app/scripts/web-config.js';
+
 var ENVIRONMENTS = {};
 
 try {
@@ -110,9 +116,22 @@ function configureParse(environment) {
     writeFileFromTemplate(PARSE_TEMPLATE_FILE, PARSE_CONFIG_FILE);
 }
 
+function configureCloudCode(environment) {
+    try {
+        assert(environment.mandrillKey, 'mandrillKey');
+    } catch (missingParameter) {
+        console.error('ERROR: environment is missing required parameter: ' +
+            missingParameter.message);
+        process.exit(4);
+    }
+
+    writeFileFromTemplate(CLOUDCODE_TEMPLATE_FILE, CLOUDCODE_CONFIG_FILE);
+}
+
 function configureEnvironment(environment) {
     configureParse(environment);
     configureWebsite(environment);
+    configureCloudCode(environment);
 }
 
 /************************
