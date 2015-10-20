@@ -130,7 +130,7 @@ function configureCloudCode(environment) {
 
 function configureEnvironment(environment) {
     configureParse(environment);
-    configureWebsite(environment);
+    //configureWebsite(environment);
     configureCloudCode(environment);
 }
 

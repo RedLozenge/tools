@@ -82,6 +82,7 @@ fi
 if [ -z "${TARGET}" ]; then
     TARGET="${DEFAULT_TARGET}"
 fi
+TARGET_LOWERCASE="`echo -n $TARGET |  tr '[:upper:]' '[:lower:]'`"
 
 # Validate options
 validate "${ENVIRONMENT}" "${VALID_ENVIRONMENTS}" "Invalid environment"
@@ -95,6 +96,7 @@ echo "building ${TARGET} project from Unity..."
 /Applications/Unity/Unity.app/Contents/MacOS/Unity \
     -batchmode \
     -quit \
+    -buildTarget ${TARGET_LOWERCASE} \
     -logFile "${BUILD_LOG}" \
     -projectPath "${BASE_PATH}/" \
     -executeMethod "BuildScript.Perform${ENVIRONMENT}${TARGET}Build"
